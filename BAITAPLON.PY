@@ -7,14 +7,13 @@ import time
 from datetime import datetime
 import os
 
-# === Hàm khởi tạo trình duyệt ===
+
 def khoi_tao_trinh_duyet():
     trinh_duyet = webdriver.Chrome()
     trinh_duyet.get("https://alonhadat.com.vn/")
     trinh_duyet.maximize_window()
     return trinh_duyet
 
-# === Hàm chọn bộ lọc tìm kiếm ===
 def ap_dung_bo_loc(trinh_duyet, doi):
     thanh_pho = Select(doi.until(EC.presence_of_element_located((By.CLASS_NAME, "province"))))
     thanh_pho.select_by_visible_text("Đà Nẵng")
@@ -26,7 +25,7 @@ def ap_dung_bo_loc(trinh_duyet, doi):
     nut_tim_kiem.click()
     time.sleep(3)
 
-# === Hàm trích xuất dữ liệu từ một trang ===
+
 def trich_xuat_du_lieu_trang(trinh_duyet):
     tieu_de = trinh_duyet.find_elements(By.CSS_SELECTOR, ".ct_title a")
     mo_ta = trinh_duyet.find_elements(By.CSS_SELECTOR, ".ct_brief")
@@ -53,7 +52,7 @@ def trich_xuat_du_lieu_trang(trinh_duyet):
             print(f"Lỗi ở tin số {i}: {e}")
     return du_lieu_trang
 
-# === Hàm xử lý chuyển trang và gom dữ liệu ===
+
 def thu_thap_du_lieu(trinh_duyet, doi, so_trang_toi_da=5):
     tat_ca_du_lieu = []
 
@@ -73,14 +72,14 @@ def thu_thap_du_lieu(trinh_duyet, doi, so_trang_toi_da=5):
 
     return tat_ca_du_lieu
 
-# === Hàm lưu dữ liệu vào Excel ===
+
 def luu_vao_excel(du_lieu, duong_dan_file):
     os.makedirs(os.path.dirname(duong_dan_file), exist_ok=True)
     df = pd.DataFrame(du_lieu)
     df.to_excel(duong_dan_file, index=False, engine='openpyxl')
     print(f"Đã lưu {len(du_lieu)} dòng dữ liệu vào {duong_dan_file}")
 
-# === Hàm chính để chạy crawler ===
+
 def chay_trinh_thu_thap():
     print("Bắt đầu thu thập dữ liệu lúc", datetime.now().strftime("%H:%M:%S"))
 
@@ -95,7 +94,7 @@ def chay_trinh_thu_thap():
     finally:
         trinh_duyet.quit()
 
-# === Lên lịch chạy lúc 06:00 sáng ===
+
 if __name__ == "__main__":
     print("Hệ thống đang chờ đến 06:00 để chạy trình thu thập dữ liệu...")
 
