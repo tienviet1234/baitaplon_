@@ -14,6 +14,7 @@ def khoi_tao_trinh_duyet():
     trinh_duyet.maximize_window()
     return trinh_duyet
 
+
 def ap_dung_bo_loc(trinh_duyet, doi):
     thanh_pho = Select(doi.until(EC.presence_of_element_located((By.CLASS_NAME, "province"))))
     thanh_pho.select_by_visible_text("Đà Nẵng")
@@ -52,25 +53,33 @@ def trich_xuat_du_lieu_trang(trinh_duyet):
             print(f"Lỗi ở tin số {i}: {e}")
     return du_lieu_trang
 
-
-def thu_thap_du_lieu(trinh_duyet, doi, so_trang_toi_da=5):
+def thu_thap_du_lieu(trinh_duyet, doi):
     tat_ca_du_lieu = []
+    so_trang = 1
 
-    for trang_hien_tai in range(1, so_trang_toi_da + 1):
-        print(f"Đang xử lý trang {trang_hien_tai}")
-        tat_ca_du_lieu.extend(trich_xuat_du_lieu_trang(trinh_duyet))
+    while True:
+        url = f"https://alonhadat.com.vn/nha-dat/cho-thue/nha-dat/3/da-nang/trang--{so_trang}.html"
+        print(f"Đang xử lý trang {so_trang}: {url}")
+        trinh_duyet.get(url)
 
         try:
-            nut_tiep = doi.until(EC.presence_of_element_located((By.LINK_TEXT, ">>")))
-            if "disabled" in nut_tiep.get_attribute("class") or not nut_tiep.is_enabled():
+            doi.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ct_title a")))
+            du_lieu_trang = trich_xuat_du_lieu_trang(trinh_duyet)
+
+            if not du_lieu_trang:
+                print("Không còn dữ liệu. Kết thúc.")
                 break
-            nut_tiep.click()
-            time.sleep(3)
+
+            tat_ca_du_lieu.extend(du_lieu_trang)
         except Exception as e:
-            print("Không thể chuyển trang hoặc đã hết trang:", e)
+            print(f"Lỗi ở trang {so_trang}: {e}")
             break
 
+        so_trang += 1
+        time.sleep(2)  # nghỉ giữa các lần tải trang để tránh bị chặn
+
     return tat_ca_du_lieu
+
 
 
 def luu_vao_excel(du_lieu, duong_dan_file):
@@ -88,7 +97,7 @@ def chay_trinh_thu_thap():
 
     try:
         ap_dung_bo_loc(trinh_duyet, doi)
-        du_lieu = thu_thap_du_lieu(trinh_duyet, doi, so_trang_toi_da=5)
+        du_lieu = thu_thap_du_lieu(trinh_duyet, doi)
         duong_dan_file = "C:\\Users\\ASUS-PRO\\Documents\\BAITAPLON\\file_luu.xlsx"
         luu_vao_excel(du_lieu, duong_dan_file)
     finally:
@@ -100,7 +109,7 @@ if __name__ == "__main__":
 
     while True:
         bay_gio = datetime.now()
-        if bay_gio.hour == 6 and bay_gio.minute == 00:
+        if bay_gio.hour == 20 and bay_gio.minute == 21:
             chay_trinh_thu_thap()
             time.sleep(70)  # tránh chạy lại trong cùng phút
         else:
